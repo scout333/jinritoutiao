@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日头条新闻分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #000000; /* 页面整体背景设置为黑色 */
+            line-height: 1.6;
+            padding: 50px; /* 增加页边距 */
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .header-top .logo {
+            width: 50px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #ff7f50; /* 橙色 */
+            font-weight: bold;
+            text-decoration: underline;
+            text-align: center; /* 确保大标题居中 */
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+
+        nav ul li a:hover {
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .intro {
+            background-color: #eef7f9; /* 背景色 */
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .intro h2 {
+            color: #4682b4; /* 蓝色 */
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .intro p {
+            font-size: 1.2rem;
+            color: #333;
+            line-height: 1.8;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        h3 {
+            font-size: 1.6rem;
+            color: #444;
+            margin-top: 30px;
+            text-decoration: underline;
+        }
+
+        h4 {
+            font-size: 1.4rem;
+            color: #555;
+            margin-top: 20px;
+            font-weight: normal;
+        }
+
+        p {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 10px;
+            line-height: 1.8;
+        }
+
+        .card {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #wordcloud-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        #wordcloud-container img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 40px;
+        }
+
+        /* 主体部分背景色 */
+        #analysis, #wordcloud {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-top">
+            <h1>今日头条新闻标题 数据爬取与分析</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#analysis">数据分析</a></li>
+                <li><a href="#wordcloud">词云展示</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="intro">
+            <h2>选题与简介</h2>
+            <p>在数字化时代，新闻媒体是公众获取信息的主要渠道之一。今日头条作为中国领先的新闻和内容聚合平台，其新闻标题不仅反映了媒体的报道重点，也映射了社会热点和公众关注。通过分析今日头条新闻标题中的高频词汇，我们可以洞察到当前社会的主要关注点、文化趋势以及公众情绪。这种分析有助于理解媒体如何塑造公众话语，以及社会议题如何被呈现和讨论。
+                    本研究旨在通过对今日头条3457条新闻标题的爬取和分析，分析今日头条新闻标题中的高频词汇，制作词云图，以揭示当前社会的主要关注点和文化趋势。
+            </p>
+        </section>
+
+        <section id="wordcloud">
+            <h2>词云展示</h2>
+            <div id="wordcloud-container">
+                <img src="file:///F:/%E4%B8%AD%E4%BC%A0%E7%9B%B8%E5%85%B3/%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1/%E6%9C%9F%E6%9C%AB/22%E6%95%B0%E6%96%B0202201073004%E7%A9%86%E8%8D%A3%E8%90%B1%E6%9C%9F%E6%9C%AB%E4%BD%9C%E4%B8%9A/Figure_1.png" alt="词云图" />
+            </div>
+        </section>
+
+        <section id="analysis">
+            <h2>数据分析</h2>
+            <p>以下是对今日头条新闻标题的分析结果：</p>
+
+            <div class="card">
+                <h3>高频词汇分析</h3>
+                <p>词云图中字体最大的词是“中国”、“美国”、“评论”、“麻将”、“年”等，这些词汇在新闻标题中出现的频率最高，表明这些是新闻报道中最常见的主题或关键词。</p>
+            </div>
+
+            <div class="card">
+                <h3>主题分析</h3>
+                <h4>国家</h4>
+                <p>词云中“中国”和“美国”的出现频率较高，可能表明今日头条上的新闻标题经常涉及这两个国家的相关话题，如政治、经济、社会事件等。</p>
+
+                <h4>社会活动</h4>
+                <p>词汇如“麻将”、“春节”、“过年”等表明新闻标题中经常提到与中国传统活动和节日相关的内容。</p>
+
+                <h4>日常生活</h4>
+                <p>词汇如“生活”、“美食”、“家庭”等显示新闻标题关注人们的日常生活和兴趣。</p>
+
+                <h4>时间因素</h4>
+                <p>词汇如“年”、“春节”、“月”等表明新闻标题中经常提到时间或节日，这可能与特定时期的新闻报道有关，如春节期间的特别报道。</p>
+
+                <h4>社会现象</h4>
+                <p>词汇如“评论”、“问题”、“发现”等表明新闻标题中经常包含对某些社会现象或问题的讨论和分析。</p>
+
+                <h4>人物和事件</h4>
+                <p>词云中出现的“特朗普”、“习近平”等名字表明新闻标题中经常提到这些公众人物，可能与他们的活动或政策有关。</p>
+
+                <h4>情感和态度</h4>
+                <p>词汇如“祝福”、“成功”、“重要”等可能表明新闻标题倾向于传达积极的情感和态度。</p>
+
+                <h4>地域特征</h4>
+                <p>词汇如“广东”、“韩国”等表明新闻标题中经常提到特定地区，可能与这些地区的特定事件或文化有关。</p>
+
+                <h4>语言和文化</h4>
+                <p>词汇如“麻将”、“特朗普”等显示新闻标题中包含中文和英文的混合使用，反映了语言和文化的多样性。</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>数据展示与分析：今日头条新闻分析</p>
+    </footer>
+
+
+   
